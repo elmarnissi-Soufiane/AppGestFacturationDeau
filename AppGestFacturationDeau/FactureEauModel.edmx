@@ -1,0 +1,528 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="db_facture_eauModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Adherent">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CIN" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="Nom" Type="nvarchar" MaxLength="99" Nullable="false" />
+          <Property Name="Prenom" Type="nvarchar" MaxLength="99" Nullable="false" />
+          <Property Name="Date Inscription" Type="date" />
+        </EntityType>
+        <EntityType Name="Compteur">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdAdherent" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Consomation">
+          <Key>
+            <PropertyRef Name="IdCompteur" />
+            <PropertyRef Name="Date debut" />
+            <PropertyRef Name="Date fin" />
+          </Key>
+          <Property Name="IdCompteur" Type="int" Nullable="false" />
+          <Property Name="Date debut" Type="date" Nullable="false" />
+          <Property Name="Date fin" Type="date" Nullable="false" />
+          <Property Name="Ancienne" Type="int" Nullable="false" />
+          <Property Name="Nouvelle" Type="int" Nullable="false" />
+          <Property Name="Perenete" Type="money" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Facture">
+          <Key>
+            <PropertyRef Name="IdF" />
+          </Key>
+          <Property Name="IdF" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdC" Type="int" Nullable="false" />
+          <Property Name="Prix" Type="money" Nullable="false" />
+          <Property Name="DateFac" Type="date" Nullable="false" />
+          <Property Name="DateFin" Type="date" StoreGeneratedPattern="Computed" />
+          <Property Name="Paye" Type="nvarchar" MaxLength="6" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Taxe">
+          <Key>
+            <PropertyRef Name="IdT" />
+          </Key>
+          <Property Name="IdT" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Prix" Type="money" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Tranche">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Libelle" Type="nvarchar" MaxLength="99" Nullable="false" />
+          <Property Name="Prix" Type="money" />
+        </EntityType>
+        <EntityType Name="Utilisateur">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="LoginUtil" Type="nvarchar" MaxLength="99" Nullable="false" />
+          <Property Name="Mot de passe" Type="nvarchar" MaxLength="99" Nullable="false" />
+        </EntityType>
+        <Association Name="FK__Compteur__IdAdhe__15502E78">
+          <End Role="Adherent" Type="Self.Adherent" Multiplicity="1" />
+          <End Role="Compteur" Type="Self.Compteur" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Adherent">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Compteur">
+              <PropertyRef Name="IdAdherent" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Consomati__IdCom__182C9B23">
+          <End Role="Compteur" Type="Self.Compteur" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Consomation" Type="Self.Consomation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Compteur">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Consomation">
+              <PropertyRef Name="IdCompteur" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Facture__IdC__1FCDBCEB">
+          <End Role="Compteur" Type="Self.Compteur" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Facture" Type="Self.Facture" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Compteur">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Facture">
+              <PropertyRef Name="IdC" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="CALCUL_CONSOM" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="CONS" Type="int" Mode="In" />
+          <ReturnType>
+            <CollectionType>
+              <RowType>
+                <Property Name="QTE_1" Type="int" />
+                <Property Name="QTE_2" Type="int" />
+                <Property Name="QTE_3" Type="int" />
+              </RowType>
+            </CollectionType>
+          </ReturnType>
+        </Function>
+        <Function Name="PRIX_TRANCHE" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="true" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <ReturnType>
+            <CollectionType>
+              <RowType>
+                <Property Name="TR_1" Type="money" />
+                <Property Name="TR_2" Type="money" />
+                <Property Name="TR_3" Type="money" />
+              </RowType>
+            </CollectionType>
+          </ReturnType>
+        </Function>
+        <Function Name="PS_Paye_Cry" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="MoisFac" Type="int" Mode="In" />
+          <Parameter Name="IdC" Type="int" Mode="In" />
+        </Function>
+        <Function Name="Ps_Qte_Cry" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="Mois" Type="int" Mode="In" />
+        </Function>
+        <Function Name="Ps_Taxe_Cry" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
+        <EntityContainer Name="db_facture_eauModelStoreContainer">
+          <EntitySet Name="Adherent" EntityType="Self.Adherent" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Compteur" EntityType="Self.Compteur" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Consomation" EntityType="Self.Consomation" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Facture" EntityType="Self.Facture" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Taxe" EntityType="Self.Taxe" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Tranche" EntityType="Self.Tranche" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Utilisateur" EntityType="Self.Utilisateur" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__Compteur__IdAdhe__15502E78" Association="Self.FK__Compteur__IdAdhe__15502E78">
+            <End Role="Adherent" EntitySet="Adherent" />
+            <End Role="Compteur" EntitySet="Compteur" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Consomati__IdCom__182C9B23" Association="Self.FK__Consomati__IdCom__182C9B23">
+            <End Role="Compteur" EntitySet="Compteur" />
+            <End Role="Consomation" EntitySet="Consomation" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Facture__IdC__1FCDBCEB" Association="Self.FK__Facture__IdC__1FCDBCEB">
+            <End Role="Compteur" EntitySet="Compteur" />
+            <End Role="Facture" EntitySet="Facture" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="db_facture_eauModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Adherent">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CIN" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Nom" Type="String" MaxLength="99" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Prenom" Type="String" MaxLength="99" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Date_Inscription" Type="DateTime" Precision="0" />
+          <NavigationProperty Name="Compteurs" Relationship="Self.FK__Compteur__IdAdhe__15502E78" FromRole="Adherent" ToRole="Compteur" />
+        </EntityType>
+        <EntityType Name="Compteur">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdAdherent" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Adherent" Relationship="Self.FK__Compteur__IdAdhe__15502E78" FromRole="Compteur" ToRole="Adherent" />
+          <NavigationProperty Name="Consomations" Relationship="Self.FK__Consomati__IdCom__182C9B23" FromRole="Compteur" ToRole="Consomation" />
+          <NavigationProperty Name="Factures" Relationship="db_facture_eauModel.FK__Facture__IdC__49C3F6B7" FromRole="Compteur" ToRole="Facture" />
+        </EntityType>
+        <EntityType Name="Consomation">
+          <Key>
+            <PropertyRef Name="IdCompteur" />
+            <PropertyRef Name="Date_debut" />
+            <PropertyRef Name="Date_fin" />
+          </Key>
+          <Property Name="IdCompteur" Type="Int32" Nullable="false" />
+          <Property Name="Date_debut" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="Date_fin" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="Ancienne" Type="Int32" Nullable="false" />
+          <Property Name="Nouvelle" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Compteur" Relationship="Self.FK__Consomati__IdCom__182C9B23" FromRole="Consomation" ToRole="Compteur" />
+          <Property Name="Perenete" Type="Decimal" Nullable="false" Precision="19" Scale="4" />
+        </EntityType>
+        <EntityType Name="Tranche">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Libelle" Type="String" MaxLength="99" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Prix" Type="Decimal" Precision="19" Scale="4" />
+        </EntityType>
+        <EntityType Name="Utilisateur">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="LoginUtil" Type="String" MaxLength="99" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Mot_de_passe" Type="String" MaxLength="99" FixedLength="false" Unicode="true" Nullable="false" />
+        </EntityType>
+        <Association Name="FK__Compteur__IdAdhe__15502E78">
+          <End Role="Adherent" Type="Self.Adherent" Multiplicity="1" />
+          <End Role="Compteur" Type="Self.Compteur" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Adherent">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Compteur">
+              <PropertyRef Name="IdAdherent" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Consomati__IdCom__182C9B23">
+          <End Role="Compteur" Type="Self.Compteur" Multiplicity="1" />
+          <End Role="Consomation" Type="Self.Consomation" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Compteur">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Consomation">
+              <PropertyRef Name="IdCompteur" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="db_facture_eauEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Adherents" EntityType="Self.Adherent" />
+          <EntitySet Name="Compteurs" EntityType="Self.Compteur" />
+          <EntitySet Name="Consomations" EntityType="Self.Consomation" />
+          <EntitySet Name="Tranches" EntityType="Self.Tranche" />
+          <EntitySet Name="Utilisateurs" EntityType="Self.Utilisateur" />
+          <AssociationSet Name="FK__Compteur__IdAdhe__15502E78" Association="Self.FK__Compteur__IdAdhe__15502E78">
+            <End Role="Adherent" EntitySet="Adherents" />
+            <End Role="Compteur" EntitySet="Compteurs" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Consomati__IdCom__182C9B23" Association="Self.FK__Consomati__IdCom__182C9B23">
+            <End Role="Compteur" EntitySet="Compteurs" />
+            <End Role="Consomation" EntitySet="Consomations" />
+          </AssociationSet>
+          <EntitySet Name="Taxes" EntityType="db_facture_eauModel.Taxe" />
+          <EntitySet Name="Factures" EntityType="db_facture_eauModel.Facture" />
+          <AssociationSet Name="FK__Facture__IdC__49C3F6B7" Association="db_facture_eauModel.FK__Facture__IdC__49C3F6B7">
+            <End Role="Compteur" EntitySet="Compteurs" />
+            <End Role="Facture" EntitySet="Factures" />
+          </AssociationSet>
+          <FunctionImport Name="Ps_Crystal" ReturnType="Collection(db_facture_eauModel.Ps_Crystal_Result)">
+          <Parameter Name="Mois" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="Ps_Taxe_Cry" ReturnType="Collection(Decimal)" />
+          <FunctionImport Name="Ps_Tranche_Cry" ReturnType="Collection(db_facture_eauModel.Ps_Tranche_Cry_Result)" />
+          <FunctionImport Name="Ps_Crystal_Facture" ReturnType="Collection(db_facture_eauModel.Ps_Crystal_Facture_Result)">
+          <Parameter Name="Mois" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="PS_Paye_Cry" ReturnType="Collection(db_facture_eauModel.PS_Paye_Cry_Result)" >
+            <Parameter Name="MoisFac" Mode="In" Type="Int32" />
+            <Parameter Name="IdC" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="CALCUL_CONSOM" IsComposable="true" ReturnType="Collection(db_facture_eauModel.CALCUL_CONSOM_Result)">
+          <Parameter Name="CONS" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="PRIX_TRANCHE" IsComposable="true" ReturnType="Collection(db_facture_eauModel.PRIX_TRANCHE_Result)" />
+          <FunctionImport Name="PS_CALCUL_CONSOM" ReturnType="Collection(db_facture_eauModel.PS_CALCUL_CONSOM_Result)">
+          <Parameter Name="CONS" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="Ps_Qte_Cry" ReturnType="Collection(db_facture_eauModel.Ps_Qte_Cry_Result)">
+          <Parameter Name="Mois" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <FunctionImport Name="Ps_Pernete_Cry" ReturnType="Collection(Decimal)" />
+        </EntityContainer>
+        <EntityType Name="Taxe">
+          <Key>
+            <PropertyRef Name="IdT" />
+          </Key>
+          <Property Name="IdT" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Prix" Type="Decimal" Nullable="false" Precision="19" Scale="4" />
+        </EntityType>
+        <EntityType Name="Facture">
+          <Key>
+            <PropertyRef Name="IdF" />
+          </Key>
+          <Property Name="IdF" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdC" Type="Int32" Nullable="false" />
+          <Property Name="Prix" Type="Decimal" Nullable="false" Precision="19" Scale="4" />
+          <Property Name="DateFac" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="DateFin" Type="DateTime" annotation:StoreGeneratedPattern="Computed" Precision="0" />
+          <Property Name="Paye" Type="String" Nullable="false" MaxLength="6" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Compteur" Relationship="db_facture_eauModel.FK__Facture__IdC__49C3F6B7" FromRole="Facture" ToRole="Compteur" />
+        </EntityType>
+        <Association Name="FK__Facture__IdC__49C3F6B7">
+          <End Type="db_facture_eauModel.Compteur" Role="Compteur" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="db_facture_eauModel.Facture" Role="Facture" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Compteur">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Facture">
+              <PropertyRef Name="IdC" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <ComplexType Name="Ps_Crystal_Result">
+          <Property Type="Int32" Name="Ancienne" Nullable="false" />
+          <Property Type="Int32" Name="Nouvelle" Nullable="false" />
+          <Property Type="Int32" Name="Id" Nullable="false" />
+          <Property Type="String" Name="Nom" Nullable="false" MaxLength="99" />
+          <Property Type="String" Name="Prenom" Nullable="false" MaxLength="99" />
+          <Property Type="Int32" Name="Mois" Nullable="true" />
+          <Property Type="Decimal" Name="Prix" Nullable="false" Precision="19" />
+          <Property Type="DateTime" Name="DateFin" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="Ps_Tranche_Cry_Result">
+          <Property Type="String" Name="Libelle" Nullable="false" MaxLength="99" />
+          <Property Type="Decimal" Name="Prix" Nullable="true" Precision="19" />
+        </ComplexType>
+        <ComplexType Name="Ps_Crystal_Facture_Result">
+          <Property Type="Int32" Name="Ancienne" Nullable="false" />
+          <Property Type="Int32" Name="Nouvelle" Nullable="false" />
+          <Property Type="Int32" Name="Id" Nullable="false" />
+          <Property Type="String" Name="Nom" Nullable="false" MaxLength="99" />
+          <Property Type="String" Name="Prenom" Nullable="false" MaxLength="99" />
+          <Property Type="Int32" Name="Mois" Nullable="true" />
+          <Property Type="Decimal" Name="Prix" Nullable="false" Precision="19" />
+          <Property Type="DateTime" Name="DateFac" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="PS_Paye_Cry_Result">
+          <Property Type="Int32" Name="Id" Nullable="false" />
+          <Property Type="String" Name="Nom" Nullable="false" MaxLength="99" />
+          <Property Type="String" Name="Prenom" Nullable="false" MaxLength="99" />
+          <Property Type="Int32" Name="Mois" Nullable="true" />
+          <Property Type="Decimal" Name="Prix" Nullable="false" Precision="19" />
+        </ComplexType>
+        <ComplexType Name="CALCUL_CONSOM_Result">
+          <Property Type="Int32" Name="QTE_1" Nullable="true" />
+          <Property Type="Int32" Name="QTE_2" Nullable="true" />
+          <Property Type="Int32" Name="QTE_3" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="PRIX_TRANCHE_Result">
+          <Property Type="Decimal" Name="TR_1" Nullable="true" Precision="19" Scale="4" />
+          <Property Type="Decimal" Name="TR_2" Nullable="true" Precision="19" Scale="4" />
+          <Property Type="Decimal" Name="TR_3" Nullable="true" Precision="19" Scale="4" />
+        </ComplexType>
+        <ComplexType Name="PS_CALCUL_CONSOM_Result">
+          <Property Type="Int32" Name="QTE_1" Nullable="true" />
+          <Property Type="Int32" Name="QTE_2" Nullable="true" />
+          <Property Type="Int32" Name="QTE_3" Nullable="true" />
+        </ComplexType>
+        <ComplexType Name="Ps_Qte_Cry_Result">
+          <Property Type="Int32" Name="Ancienne" Nullable="false" />
+          <Property Type="Int32" Name="Nouvelle" Nullable="false" />
+          <Property Type="Int32" Name="Id" Nullable="false" />
+          <Property Type="String" Name="Nom" Nullable="false" MaxLength="99" />
+          <Property Type="String" Name="Prenom" Nullable="false" MaxLength="99" />
+          <Property Type="Int32" Name="Mois" Nullable="true" />
+          <Property Type="Decimal" Name="Prix" Nullable="false" Precision="19" />
+          <Property Type="DateTime" Name="DateFac" Nullable="false" />
+          <Property Type="DateTime" Name="DateFin" Nullable="true" />
+          <Property Type="Int32" Name="qte" Nullable="true" />
+          <Property Type="Int32" Name="q1" Nullable="true" />
+          <Property Type="Int32" Name="q2" Nullable="true" />
+          <Property Type="Int32" Name="q3" Nullable="true" />
+        </ComplexType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="db_facture_eauModelStoreContainer" CdmEntityContainer="db_facture_eauEntities">
+          <EntitySetMapping Name="Adherents">
+            <EntityTypeMapping TypeName="db_facture_eauModel.Adherent">
+              <MappingFragment StoreEntitySet="Adherent">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="CIN" ColumnName="CIN" />
+                <ScalarProperty Name="Nom" ColumnName="Nom" />
+                <ScalarProperty Name="Prenom" ColumnName="Prenom" />
+                <ScalarProperty Name="Date_Inscription" ColumnName="Date Inscription" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Compteurs">
+            <EntityTypeMapping TypeName="db_facture_eauModel.Compteur">
+              <MappingFragment StoreEntitySet="Compteur">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="IdAdherent" ColumnName="IdAdherent" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Consomations">
+            <EntityTypeMapping TypeName="db_facture_eauModel.Consomation">
+              <MappingFragment StoreEntitySet="Consomation">
+                <ScalarProperty Name="Perenete" ColumnName="Perenete" />
+                <ScalarProperty Name="IdCompteur" ColumnName="IdCompteur" />
+                <ScalarProperty Name="Date_debut" ColumnName="Date debut" />
+                <ScalarProperty Name="Date_fin" ColumnName="Date fin" />
+                <ScalarProperty Name="Ancienne" ColumnName="Ancienne" />
+                <ScalarProperty Name="Nouvelle" ColumnName="Nouvelle" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Tranches">
+            <EntityTypeMapping TypeName="db_facture_eauModel.Tranche">
+              <MappingFragment StoreEntitySet="Tranche">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Libelle" ColumnName="Libelle" />
+                <ScalarProperty Name="Prix" ColumnName="Prix" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Utilisateurs">
+            <EntityTypeMapping TypeName="db_facture_eauModel.Utilisateur">
+              <MappingFragment StoreEntitySet="Utilisateur">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="LoginUtil" ColumnName="LoginUtil" />
+                <ScalarProperty Name="Mot_de_passe" ColumnName="Mot de passe" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Taxes">
+            <EntityTypeMapping TypeName="db_facture_eauModel.Taxe">
+              <MappingFragment StoreEntitySet="Taxe">
+                <ScalarProperty Name="Prix" ColumnName="Prix" />
+                <ScalarProperty Name="IdT" ColumnName="IdT" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Factures">
+            <EntityTypeMapping TypeName="db_facture_eauModel.Facture">
+              <MappingFragment StoreEntitySet="Facture">
+                <ScalarProperty Name="Paye" ColumnName="Paye" />
+                <ScalarProperty Name="DateFin" ColumnName="DateFin" />
+                <ScalarProperty Name="DateFac" ColumnName="DateFac" />
+                <ScalarProperty Name="Prix" ColumnName="Prix" />
+                <ScalarProperty Name="IdC" ColumnName="IdC" />
+                <ScalarProperty Name="IdF" ColumnName="IdF" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="Ps_Taxe_Cry" FunctionName="db_facture_eauModel.Store.Ps_Taxe_Cry" />
+          <FunctionImportMapping FunctionImportName="PS_Paye_Cry" FunctionName="db_facture_eauModel.Store.PS_Paye_Cry">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="db_facture_eauModel.PS_Paye_Cry_Result">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Nom" ColumnName="Nom" />
+                <ScalarProperty Name="Prenom" ColumnName="Prenom" />
+                <ScalarProperty Name="Mois" ColumnName="Mois" />
+                <ScalarProperty Name="Prix" ColumnName="Prix" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="CALCUL_CONSOM" FunctionName="db_facture_eauModel.Store.CALCUL_CONSOM">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="db_facture_eauModel.CALCUL_CONSOM_Result">
+                <ScalarProperty Name="QTE_1" ColumnName="QTE_1" />
+                <ScalarProperty Name="QTE_2" ColumnName="QTE_2" />
+                <ScalarProperty Name="QTE_3" ColumnName="QTE_3" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="PRIX_TRANCHE" FunctionName="db_facture_eauModel.Store.PRIX_TRANCHE">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="db_facture_eauModel.PRIX_TRANCHE_Result">
+                <ScalarProperty Name="TR_1" ColumnName="TR_1" />
+                <ScalarProperty Name="TR_2" ColumnName="TR_2" />
+                <ScalarProperty Name="TR_3" ColumnName="TR_3" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+          <FunctionImportMapping FunctionImportName="Ps_Qte_Cry" FunctionName="db_facture_eauModel.Store.Ps_Qte_Cry">
+            <ResultMapping>
+              <ComplexTypeMapping TypeName="db_facture_eauModel.Ps_Qte_Cry_Result">
+                <ScalarProperty Name="Ancienne" ColumnName="Ancienne" />
+                <ScalarProperty Name="Nouvelle" ColumnName="Nouvelle" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Nom" ColumnName="Nom" />
+                <ScalarProperty Name="Prenom" ColumnName="Prenom" />
+                <ScalarProperty Name="Mois" ColumnName="Mois" />
+                <ScalarProperty Name="Prix" ColumnName="Prix" />
+                <ScalarProperty Name="DateFac" ColumnName="DateFac" />
+                <ScalarProperty Name="DateFin" ColumnName="DateFin" />
+                <ScalarProperty Name="qte" ColumnName="qte" />
+                <ScalarProperty Name="q1" ColumnName="q1" />
+                <ScalarProperty Name="q2" ColumnName="q2" />
+                <ScalarProperty Name="q3" ColumnName="q3" />
+              </ComplexTypeMapping>
+            </ResultMapping>
+          </FunctionImportMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Aucun" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
